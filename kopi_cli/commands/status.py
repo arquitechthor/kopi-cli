@@ -10,7 +10,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from kopi_cli.config import SERVICES, find_infra_dir
+from kopi_cli.config import SERVICES, find_compose_file
 
 console = Console()
 app = typer.Typer(help="Check health and running state of Kopi Tools services.")
@@ -66,9 +66,12 @@ def status():
 def ps():
     """List running containers (docker compose ps)."""
     try:
-        infra_dir = find_infra_dir()
+        compose_file = find_compose_file()
     except FileNotFoundError as e:
         console.print(f"[bold red]Error:[/bold red] {e}")
         raise typer.Exit(1)
 
-    subprocess.run(["docker", "compose", "ps"], cwd=infra_dir)
+    subprocess.run(
+        ["docker", "compose", "-f", str(compose_file), "ps"],
+        cwd=compose_file.parent,
+    )
